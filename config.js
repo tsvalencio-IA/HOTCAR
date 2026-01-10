@@ -2,7 +2,6 @@
 // CONFIGURAÇÕES SECRETAS (PREENCHA COM SEUS DADOS)
 
 // 1. Configuração do Firebase (Pegue no Console do Firebase)
-const firebaseConfig = {
     const firebaseConfig = {
   apiKey: "AIzaSyA_0h6IBSVIn16ajdHj-vFwFfdEOd_nMz8",
   authDomain: "hotwheels-a4395.firebaseapp.com",
