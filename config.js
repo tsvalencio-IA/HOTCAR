@@ -15,14 +15,14 @@ const firebaseConfig = {
 
 // 2. Configuração do Cloudinary (Imagens)
 const cloudinaryConfig = {
-    cloudName: "SEU_CLOUD_NAME", // Ex: demo
-    uploadPreset: "SEU_UPLOAD_PRESET" // Crie um 'Unsigned' nas settings do Cloudinary
+    cloudName: "djtiaygrs", // Ex: demo
+    uploadPreset: "hotwheels" // Crie um 'Unsigned' nas settings do Cloudinary
 };
 
 // 3. Configuração da IA Gemini (Chave Dividida)
 // Divida sua chave API do Google AI Studio em duas partes aleatórias para "enganar" bots simples
-const geminiKeyPart1 = "AIzaSyD_SUA_PARTE_1_DA_CHAVE"; 
-const geminiKeyPart2 = "_RESTANTE_DA_CHAVE_AQUI"; 
+const geminiKeyPart1 = "AIzaSyAfx1aiuP9jWzGDoh"; 
+const geminiKeyPart2 = "E6KxZ6_68wZkt27VI"; 
 
 // Exporta para usar no app principal
 export { firebaseConfig, cloudinaryConfig, geminiKeyPart1, geminiKeyPart2 };
