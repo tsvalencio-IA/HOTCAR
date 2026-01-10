@@ -15,8 +15,8 @@
             <i class="fas fa-fire-alt"></i> HW<span>GARAGE</span>
         </div>
         <div class="stats-container">
-            <i class="fas fa-car-side"></i>
-            <span id="total-cars">0</span>
+            <i class="fas fa-warehouse"></i>
+            <span id="total-cars">0</span> na Garagem
         </div>
     </header>
 
@@ -64,14 +64,20 @@
                 <span class="close-modal">&times;</span>
             </div>
             
-            <div class="preview-box">
+            <div class="preview-box" id="preview-container">
                 <img id="preview-img" src="" alt="Preview">
+                <div class="overlay-edit" id="btn-change-photo">
+                    <i class="fas fa-camera"></i> Trocar Foto
+                </div>
                 <div id="ai-loading" class="hidden">
                     <i class="fas fa-robot fa-bounce"></i> IA Analisando...
                 </div>
             </div>
+            <input type="file" id="edit-file-input" accept="image/*" style="display: none;">
 
             <form id="car-form">
+                <input type="hidden" id="inp-id">
+                
                 <div class="form-group">
                     <label>Modelo</label>
                     <input type="text" id="inp-nome" required placeholder="Ex: Bone Shaker">
