@@ -1,72 +1,74 @@
-// app.js - LÓGICA COMPLETA E INTEGRADA
+// app.js - LÓGICA CORRIGIDA E ROBUSTA
 
-// 1. IMPORTAÇÕES (Via Import Map para compatibilidade total)
+// 1. IMPORTAÇÕES
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, onValue, remove } from "firebase/database";
 import { firebaseConfig, cloudinaryConfig, geminiKeyPart1, geminiKeyPart2 } from './config.js';
 
-// 2. INICIALIZAÇÃO DO SISTEMA
+// 2. INICIALIZAÇÃO DO FIREBASE
 let app, db, dbRef;
 try {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
     dbRef = ref(db, 'hotwheels');
-    console.log("Sistema Iniciado: Firebase Conectado");
+    console.log("Firebase conectado com sucesso.");
 } catch (error) {
-    console.error("Erro Crítico ao iniciar Firebase:", error);
-    alert("Erro de configuração. Verifique o console.");
+    console.error("ERRO FIREBASE:", error);
+    alert("Erro crítico: Verifique se o arquivo config.js está preenchido corretamente.");
 }
 
-// Variáveis Globais de Controle
+// Variáveis Globais
 const API_KEY = geminiKeyPart1 + geminiKeyPart2;
 let currentImageBase64 = null;
-let currentCloudinaryUrl = null;
+let currentCloudinaryUrl = null; // Se null, usa imagem padrão
 let webcamStream = null;
 let cachedData = []; // Cache local para busca rápida
 
-// 3. REFERÊNCIAS DO DOM (Elementos da tela)
-// Dashboard
+// URL de imagem padrão (Logo Hot Wheels) caso não tenha foto
+const DEFAULT_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/2/23/Hot_Wheels_logo.svg";
+
+// 3. REFERÊNCIAS DO DOM
 const dashboard = document.getElementById('dashboard');
 const totalCarsEl = document.getElementById('total-cars');
-
-// Botões e Inputs
 const btnScan = document.getElementById('btn-scan');
+const btnManual = document.getElementById('btn-manual'); // Botão novo
 const fileInput = document.getElementById('file-input');
 const searchInput = document.getElementById('search-input');
 const btnSearchAction = document.getElementById('btn-search-action');
-
-// Modais
 const modalForm = document.getElementById('modal-form');
 const modalWebcam = document.getElementById('modal-webcam');
 const closeModalBtn = document.querySelector('.close-modal');
 const closeWebcamBtn = document.querySelector('.close-webcam');
 const aiLoading = document.getElementById('ai-loading');
-
-// Webcam Elementos
 const videoEl = document.getElementById('webcam-video');
 const canvasEl = document.getElementById('webcam-canvas');
 const btnCapture = document.getElementById('btn-capture');
 
-// --- LÓGICA 1: SISTEMA DE CÂMERA INTELIGENTE ---
+// --- LÓGICA 1: MODOS DE ENTRADA (SCAN vs MANUAL) ---
 
-btnScan.addEventListener('click', () => {
-    // Detecção de Dispositivo Móvel
+// MODO MANUAL: Adicionar sem foto obrigatória
+if(btnManual) btnManual.addEventListener('click', () => {
+    limparFormulario("Novo Carro");
+    currentCloudinaryUrl = DEFAULT_IMAGE; // Define imagem padrão
+    document.getElementById('preview-img').src = DEFAULT_IMAGE;
+    document.getElementById('modal-title').innerText = "Adição Manual";
+    modalForm.classList.remove('hidden');
+    aiLoading.classList.add('hidden');
+});
+
+// MODO SCAN: Câmera ou Arquivo
+if(btnScan) btnScan.addEventListener('click', () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
     if (isMobile) {
-        // Mobile: Abre o input de arquivo (aciona câmera nativa)
-        console.log("Modo Mobile detectado");
-        fileInput.click();
+        fileInput.click(); // Celular: Abre câmera nativa
     } else {
-        // Desktop: Abre o modal de Webcam
-        console.log("Modo Desktop detectado");
-        abrirWebcamPC();
+        abrirWebcamPC(); // PC: Abre modal webcam
     }
 });
 
-// Ação quando o usuário tira foto no celular
-fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
+// Processar arquivo selecionado (Celular ou Upload)
+if(fileInput) fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
         processarImagemParaAnalise(e.target.files[0]);
     }
 });
@@ -78,20 +80,18 @@ async function abrirWebcamPC() {
         webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         videoEl.srcObject = webcamStream;
     } catch (err) {
-        console.error("Erro webcam:", err);
-        alert("Não foi possível acessar a webcam. Verifique as permissões ou use 'Escanear' no celular.");
+        alert("Erro na Webcam. Usando seletor de arquivos.");
         modalWebcam.classList.add('hidden');
+        fileInput.click();
     }
 }
 
-btnCapture.addEventListener('click', () => {
-    // Desenha o frame atual do vídeo no canvas
+if(btnCapture) btnCapture.addEventListener('click', () => {
     canvasEl.width = videoEl.videoWidth;
     canvasEl.height = videoEl.videoHeight;
     const ctx = canvasEl.getContext('2d');
     ctx.drawImage(videoEl, 0, 0);
 
-    // Converte para Blob (arquivo)
     canvasEl.toBlob((blob) => {
         const file = new File([blob], "webcam_capture.jpg", { type: "image/jpeg" });
         encerrarWebcam();
@@ -109,21 +109,27 @@ function encerrarWebcam() {
 
 if(closeWebcamBtn) closeWebcamBtn.addEventListener('click', encerrarWebcam);
 
-
-// --- LÓGICA 2: PROCESSAMENTO, IA E UPLOAD ---
+// --- LÓGICA 2: PROCESSAMENTO E IA ---
 
 function processarImagemParaAnalise(file) {
-    // 1. Abre o modal de formulário
+    if (!file) return;
+
     modalForm.classList.remove('hidden');
+    document.getElementById('modal-title').innerText = "IA Identificando...";
     
-    // 2. Cria preview local
     const reader = new FileReader();
+    
+    // CORREÇÃO DO ERRO SPLIT: Só executamos quando carregar
     reader.onload = (e) => {
-        document.getElementById('preview-img').src = e.target.result;
-        currentImageBase64 = e.target.result.split(',')[1]; // Remove cabeçalho data:image
-        
-        // 3. Dispara processos paralelos: IA e Upload
-        analisarComGemini(currentImageBase64);
+        if(e.target.result) {
+            document.getElementById('preview-img').src = e.target.result;
+            // Pega apenas a parte Base64 da string
+            const base64Parts = e.target.result.split(',');
+            if(base64Parts.length > 1) {
+                currentImageBase64 = base64Parts[1];
+                analisarComGemini(currentImageBase64);
+            }
+        }
         fazerUploadCloudinary(file);
     };
     reader.readAsDataURL(file);
@@ -131,111 +137,71 @@ function processarImagemParaAnalise(file) {
 
 // Upload para Cloudinary
 async function fazerUploadCloudinary(file) {
-    currentCloudinaryUrl = null; // Reseta URL anterior
+    currentCloudinaryUrl = null; // Reseta para garantir que espere o novo
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', cloudinaryConfig.uploadPreset);
 
     try {
         const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, {
-            method: 'POST',
-            body: formData
+            method: 'POST', body: formData
         });
         const data = await response.json();
-        currentCloudinaryUrl = data.secure_url;
-        console.log("Upload Cloudinary concluído:", currentCloudinaryUrl);
+        
+        if (data.secure_url) {
+            currentCloudinaryUrl = data.secure_url;
+            console.log("Upload OK:", currentCloudinaryUrl);
+        } else {
+            throw new Error("Cloudinary não retornou URL");
+        }
     } catch (error) {
         console.error("Erro Upload:", error);
-        alert("Erro ao salvar a imagem na nuvem. Verifique sua internet.");
+        alert("Aviso: Falha ao subir imagem. O carro será salvo sem foto.");
+        currentCloudinaryUrl = DEFAULT_IMAGE;
     }
 }
 
-// Análise Gemini (IA)
+// IA Gemini
 async function analisarComGemini(base64Image) {
     aiLoading.classList.remove('hidden');
-    limparFormulario("Consultando Especialista...");
+    limparFormulario("Analisando...");
 
-    const prompt = `
-    Você é um especialista em Hot Wheels. Analise a imagem fornecida.
-    Retorne APENAS um JSON válido (sem markdown, sem crases) com a seguinte estrutura exata:
-    {
-        "modelo": "Nome do modelo (Ex: Twin Mill)",
-        "ano": "Ano ou Série (Ex: 2024 Mainline)",
-        "cor": "Cor predominante",
-        "curiosidade": "Uma curiosidade curta e divertida sobre este carro (máx 20 palavras)."
-    }
-    Se a imagem não for clara ou não for um carro, retorne "modelo": "Desconhecido".
-    Seja honesto, não invente informações.
-    `;
+    const prompt = `Analise este Hot Wheels. Retorne JSON: {"modelo": "Nome", "ano": "Ano/Série", "cor": "Cor", "curiosidade": "Curiosidade curta"}. Se não souber, retorne "modelo": "Desconhecido".`;
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                    ]
-                }]
+                contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Image } }] }]
             })
         });
 
         const data = await response.json();
-        
-        // Tratamento da resposta da IA
-        if (!data.candidates || !data.candidates[0].content) throw new Error("Sem resposta da IA");
-        
-        let textResult = data.candidates[0].content.parts[0].text;
-        // Limpeza de Markdown (caso a IA envie ```json ... ```)
-        textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
-        
+        const textResult = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         const jsonResult = JSON.parse(textResult);
 
-        // Preenche os campos
         document.getElementById('inp-nome').value = jsonResult.modelo || "";
         document.getElementById('inp-ano').value = jsonResult.ano || "";
         document.getElementById('inp-cor').value = jsonResult.cor || "";
         document.getElementById('inp-obs').value = jsonResult.curiosidade || "";
 
-        // Verificação de Duplicidade (Requisito do Usuário)
-        checarDuplicidade(jsonResult.modelo);
-
     } catch (error) {
         console.error("Erro IA:", error);
-        document.getElementById('inp-nome').value = "";
-        document.getElementById('inp-obs').value = "A IA não conseguiu identificar. Preencha manualmente.";
+        document.getElementById('inp-nome').value = ""; 
+        document.getElementById('inp-obs').value = "Preencha manualmente.";
     } finally {
         aiLoading.classList.add('hidden');
     }
 }
 
-function checarDuplicidade(nomeModelo) {
-    if (!nomeModelo || nomeModelo === "Desconhecido") return;
-
-    // Procura no Cache local se o nome já existe
-    const duplicado = cachedData.find(carro => 
-        carro.nome.toLowerCase().includes(nomeModelo.toLowerCase()) && carro.status === 'colecao'
-    );
-
-    if (duplicado) {
-        alert(`⚠️ ATENÇÃO: Você já tem um "${nomeModelo}" na garagem! O sistema sugeriu salvar como 'Desejo' ou 'Troca'.`);
-        document.getElementById('inp-status').value = 'desejo';
-    } else {
-        document.getElementById('inp-status').value = 'colecao';
-    }
-}
-
-// --- LÓGICA 3: SALVAR E BANCO DE DADOS ---
+// --- LÓGICA 3: SALVAR E BANCO ---
 
 document.getElementById('car-form').addEventListener('submit', (e) => {
     e.preventDefault();
 
-    if (!currentCloudinaryUrl) {
-        alert("Por favor, aguarde o upload da imagem terminar (alguns segundos).");
-        return;
-    }
+    // Se não tiver URL ainda (upload lento), espera ou usa padrão
+    const fotoFinal = currentCloudinaryUrl || DEFAULT_IMAGE;
 
     const novoCarro = {
         nome: document.getElementById('inp-nome').value,
@@ -243,7 +209,7 @@ document.getElementById('car-form').addEventListener('submit', (e) => {
         cor: document.getElementById('inp-cor').value,
         obs: document.getElementById('inp-obs').value,
         status: document.getElementById('inp-status').value,
-        foto: currentCloudinaryUrl,
+        foto: fotoFinal,
         timestamp: Date.now()
     };
 
@@ -251,110 +217,99 @@ document.getElementById('car-form').addEventListener('submit', (e) => {
         .then(() => {
             modalForm.classList.add('hidden');
             limparFormulario("");
-            alert("Carro salvo com sucesso! 🏎️");
+            alert("Carro salvo com sucesso! 🏁");
         })
-        .catch(err => alert("Erro ao salvar no banco: " + err.message));
+        .catch(err => {
+            alert("Erro ao salvar no banco. Verifique as 'Regras' do Firebase.");
+            console.error(err);
+        });
 });
 
-// Listener em Tempo Real (Lê o banco sempre que algo muda)
+// Leitura em Tempo Real (Resolve o problema das Abas)
 onValue(dbRef, (snapshot) => {
     dashboard.innerHTML = '';
     const data = snapshot.val();
-    cachedData = []; // Limpa cache
+    cachedData = [];
 
     if (!data) {
         totalCarsEl.innerText = "0";
-        dashboard.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-warehouse"></i>
-                <p>Sua garagem está vazia.</p>
-                <p>Clique em "Escanear Carro" para começar!</p>
-            </div>`;
+        dashboard.innerHTML = '<div class="empty-state"><i class="fas fa-car-crash"></i><p>Garagem vazia.</p></div>';
         return;
     }
 
-    // Transforma objeto em array e inverte (mais novos primeiro)
     const lista = Object.entries(data).reverse();
     totalCarsEl.innerText = lista.length;
 
     lista.forEach(([id, carro]) => {
-        // Adiciona ao cache para busca
-        cachedData.push({ id, ...carro });
-
-        // Cria o Card
-        criarCardHTML(id, carro);
+        cachedData.push({ id, ...carro }); // Guarda no cache para busca
+        criarCard(id, carro);
     });
     
-    // Reaplica filtro atual se necessário
-    aplicarFiltroAtual();
+    // Força aplicar o filtro atual após carregar dados
+    aplicarFiltro();
 });
 
-function criarCardHTML(id, carro) {
+function criarCard(id, carro) {
     const card = document.createElement('div');
     card.className = 'car-card';
-    card.setAttribute('data-status', carro.status); // Para filtragem
-    card.setAttribute('data-name', carro.nome.toLowerCase()); // Para busca
+    // Atributos vitais para o filtro funcionar
+    card.setAttribute('data-status', carro.status);
+    card.setAttribute('data-name', (carro.nome || "").toLowerCase());
 
     const badgeClass = carro.status === 'colecao' ? 'bg-colecao' : 'bg-desejo';
     const badgeText = carro.status === 'colecao' ? 'Na Garagem' : 'Desejado';
 
     card.innerHTML = `
         <span class="badge ${badgeClass}">${badgeText}</span>
-        <img src="${carro.foto}" alt="${carro.nome}" loading="lazy">
+        <img src="${carro.foto}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
         <div class="card-info">
             <div class="card-title">${carro.nome}</div>
             <div class="card-details">
-                <p><i class="fas fa-calendar-alt"></i> ${carro.ano}</p>
-                <p style="margin-top:5px; font-style:italic; font-size:0.75rem">"${carro.obs ? carro.obs.substring(0, 45) : ''}..."</p>
+                <p>${carro.ano}</p>
+                <p style="font-size:0.75rem; color:#888">${carro.obs ? carro.obs.substring(0,40) : ''}...</p>
             </div>
             <button class="btn-delete" onclick="window.deletarCarro('${id}')">
-                <i class="fas fa-trash-alt"></i> Remover
+                <i class="fas fa-trash"></i> Remover
             </button>
         </div>
     `;
     dashboard.appendChild(card);
 }
 
-// --- LÓGICA 4: BUSCA E FILTROS ---
+// --- LÓGICA 4: BUSCA E FILTROS (Corrigidos) ---
 
-// Variável para saber qual aba está ativa
-let filtroAtivo = 'todos';
+let filtroAbaAtivo = 'todos'; // Estado global da aba
 
-// Eventos de clique nas abas
+// Clique nas Abas
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', (e) => {
-        // Atualiza visual das abas
+        // Visual
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         e.target.classList.add('active');
         
-        // Atualiza lógica
-        filtroAtivo = e.target.getAttribute('data-filter');
-        aplicarFiltroAtual();
+        // Lógica
+        filtroAbaAtivo = e.target.getAttribute('data-filter');
+        aplicarFiltro();
     });
 });
 
-// Eventos de Busca (Botão e Enter)
-btnSearchAction.addEventListener('click', aplicarFiltroAtual);
-searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') aplicarFiltroAtual();
-});
+// Clique na Lupa e Enter
+if(btnSearchAction) btnSearchAction.addEventListener('click', aplicarFiltro);
+if(searchInput) searchInput.addEventListener('keyup', aplicarFiltro);
 
-function aplicarFiltroAtual() {
-    const termoBusca = searchInput.value.toLowerCase();
+function aplicarFiltro() {
+    const termo = searchInput.value.toLowerCase();
     const cards = document.querySelectorAll('.car-card');
 
     cards.forEach(card => {
         const statusCard = card.getAttribute('data-status');
         const nomeCard = card.getAttribute('data-name');
         
-        // Regra 1: O card corresponde à aba atual?
-        const correspondeAba = (filtroAtivo === 'todos') || (statusCard === filtroAtivo);
-        
-        // Regra 2: O card corresponde à busca digitada?
-        const correspondeBusca = nomeCard.includes(termoBusca);
+        // Lógica: Precisa passar no filtro da Aba E no filtro de Texto
+        const passaAba = (filtroAbaAtivo === 'todos') || (statusCard === filtroAbaAtivo);
+        const passaTexto = nomeCard.includes(termo);
 
-        // Só mostra se passar nas duas regras
-        if (correspondeAba && correspondeBusca) {
+        if (passaAba && passaTexto) {
             card.style.display = 'flex';
         } else {
             card.style.display = 'none';
@@ -362,20 +317,17 @@ function aplicarFiltroAtual() {
     });
 }
 
-// --- FUNÇÕES GLOBAIS E UTILITÁRIOS ---
-
+// --- UTILITÁRIOS ---
 window.deletarCarro = function(id) {
-    if (confirm("Tem certeza que deseja vender (excluir) este carro da coleção?")) {
-        remove(ref(db, `hotwheels/${id}`))
-            .catch(err => alert("Erro ao excluir: " + err.message));
-    }
+    if (confirm("Remover este carro?")) remove(ref(db, `hotwheels/${id}`));
 }
 
 if(closeModalBtn) closeModalBtn.addEventListener('click', () => modalForm.classList.add('hidden'));
 
-function limparFormulario(placeholderMsg) {
-    document.getElementById('inp-nome').value = placeholderMsg;
+function limparFormulario(titulo) {
+    document.getElementById('inp-nome').value = titulo;
     document.getElementById('inp-ano').value = "";
     document.getElementById('inp-cor').value = "";
     document.getElementById('inp-obs').value = "";
+    document.getElementById('inp-status').value = "colecao";
 }
