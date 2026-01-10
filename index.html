@@ -24,8 +24,14 @@
         <div class="actions-container">
             <button id="btn-scan" class="btn-main">
                 <div class="icon-bg"><i class="fas fa-camera"></i></div>
-                <span>Escanear Carro</span>
+                <span>Escanear com IA</span>
             </button>
+            
+            <button id="btn-manual" class="btn-secondary-action">
+                <div class="icon-bg"><i class="fas fa-pen"></i></div>
+                <span>Adicionar Manual</span>
+            </button>
+
             <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;">
         </div>
 
@@ -54,7 +60,7 @@
     <div id="modal-form" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Identificação</h2>
+                <h2 id="modal-title">Novo Carro</h2>
                 <span class="close-modal">&times;</span>
             </div>
             
