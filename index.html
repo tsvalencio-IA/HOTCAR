@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hot Wheels Collector AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <title>Hot Wheels Collector Ultimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
 
     <header>
         <div class="logo">
-            <i class="fas fa-fire-alt"></i> HW<span>Collector</span>
+            <i class="fas fa-fire-alt"></i> HW<span>GARAGE</span>
         </div>
         <div class="stats-container">
             <i class="fas fa-car-side"></i>
@@ -22,30 +22,31 @@
 
     <main>
         <div class="actions-container">
-            <button id="btn-camera" class="btn-main">
+            <button id="btn-scan" class="btn-main">
                 <div class="icon-bg"><i class="fas fa-camera"></i></div>
                 <span>Escanear Carro</span>
             </button>
-            <input type="file" id="file-input" accept="image/*" style="display: none;">
+            <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;">
         </div>
 
         <div class="filters-area">
             <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="search-input" placeholder="Qual carro procura?">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" placeholder="Pesquisar modelo...">
+                <button id="btn-search-action">Buscar</button>
             </div>
 
             <div class="tabs">
-                <button class="tab active" onclick="filtrar('todos')">Todos</button>
-                <button class="tab" onclick="filtrar('colecao')">Garagem</button>
-                <button class="tab" onclick="filtrar('desejo')">Desejos</button>
+                <button class="tab active" data-filter="todos">Todos</button>
+                <button class="tab" data-filter="colecao">Minha Garagem</button>
+                <button class="tab" data-filter="desejo">Desejos</button>
             </div>
         </div>
 
         <div id="dashboard" class="grid-container">
             <div class="loading-state">
                 <i class="fas fa-circle-notch fa-spin"></i>
-                <p>Carregando motores...</p>
+                <p>Carregando coleção...</p>
             </div>
         </div>
     </main>
@@ -53,49 +54,63 @@
     <div id="modal-form" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Novo Piloto!</h2>
+                <h2>Identificação</h2>
                 <span class="close-modal">&times;</span>
             </div>
             
             <div class="preview-box">
                 <img id="preview-img" src="" alt="Preview">
                 <div id="ai-loading" class="hidden">
-                    <i class="fas fa-robot"></i> IA Analisando...
+                    <i class="fas fa-robot fa-bounce"></i> IA Analisando...
                 </div>
             </div>
 
             <form id="car-form">
-                <div class="input-group">
+                <div class="form-group">
                     <label>Modelo</label>
-                    <input type="text" id="inp-nome" required placeholder="Ex: Twin Mill">
+                    <input type="text" id="inp-nome" required placeholder="Ex: Bone Shaker">
                 </div>
                 
-                <div class="row">
-                    <div class="input-group">
+                <div class="form-row">
+                    <div class="form-group">
                         <label>Ano/Série</label>
                         <input type="text" id="inp-ano" placeholder="2024">
                     </div>
-                    <div class="input-group">
+                    <div class="form-group">
                         <label>Cor</label>
-                        <input type="text" id="inp-cor" placeholder="Cor">
+                        <input type="text" id="inp-cor" placeholder="Cor Principal">
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label>Detalhes da IA</label>
-                    <textarea id="inp-obs" placeholder="Aguardando análise..."></textarea>
+                <div class="form-group">
+                    <label>Curiosidades</label>
+                    <textarea id="inp-obs" placeholder="Detalhes..."></textarea>
                 </div>
 
-                <div class="input-group">
-                    <label>Destino</label>
+                <div class="form-group">
+                    <label>Status</label>
                     <select id="inp-status">
-                        <option value="colecao">🏁 Minha Garagem</option>
+                        <option value="colecao">✅ Tenho na Garagem</option>
                         <option value="desejo">⭐ Lista de Desejos</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-save">Salvar no Sistema</button>
+                <button type="submit" class="btn-save">SALVAR REGISTRO</button>
             </form>
+        </div>
+    </div>
+
+    <div id="modal-webcam" class="modal hidden">
+        <div class="modal-content webcam-content">
+            <div class="modal-header">
+                <h2>Câmera</h2>
+                <span class="close-webcam">&times;</span>
+            </div>
+            <div class="video-container">
+                <video id="webcam-video" autoplay playsinline></video>
+                <canvas id="webcam-canvas" style="display:none;"></canvas>
+            </div>
+            <button id="btn-capture" class="btn-main">📸 Capturar Foto</button>
         </div>
     </div>
 
@@ -109,13 +124,6 @@
     </script>
 
     <script type="module" src="app.js"></script>
-    
-    <script>
-        function filtrar(tipo) {
-            window.dispatchEvent(new CustomEvent('filtrarGrid', { detail: tipo }));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-    </script>
+
 </body>
 </html>
