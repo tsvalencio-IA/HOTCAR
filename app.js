@@ -1,4 +1,4 @@
-// app.js - VERSÃO DEFINITIVA: IDENTIFICAÇÃO HIERÁRQUICA E PRECISA
+// app.js - VERSÃO COM GOOGLE SEARCH GROUNDING (CONECTADO À REDE)
 
 // 1. IMPORTAÇÕES
 import { initializeApp } from "firebase/app";
@@ -11,7 +11,7 @@ try {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
     dbRef = ref(db, 'hotwheels');
-    console.log("Sistema HW Garage: Módulo de Visão Computacional Avançado Iniciado.");
+    console.log("Sistema HW Garage: Módulo de Busca Online Ativado.");
 } catch (error) {
     console.error("Erro Crítico Firebase:", error);
     alert("Falha na conexão com o banco de dados. Verifique o console.");
@@ -22,7 +22,7 @@ const API_KEY = geminiKeyPart1 + geminiKeyPart2;
 let currentImageBase64 = null;
 let currentCloudinaryUrl = null;
 let webcamStream = null;
-let cachedData = []; // Cache para verificação de duplicidade
+let cachedData = [];
 let isEditing = false;
 
 const DEFAULT_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/2/23/Hot_Wheels_logo.svg";
@@ -78,11 +78,10 @@ if(editFileInput) editFileInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files.length > 0) processarImagemParaAnalise(e.target.files[0]);
 });
 
-// Webcam (Alta Resolução)
+// Webcam (Alta Resolução para OCR)
 async function abrirWebcamPC() {
     modalWebcam.classList.remove('hidden');
     try {
-        // Tenta forçar resolução máxima para ajudar a ler detalhes
         webcamStream = await navigator.mediaDevices.getUserMedia({ 
             video: { 
                 facingMode: "environment", 
@@ -92,7 +91,6 @@ async function abrirWebcamPC() {
         });
         videoEl.srcObject = webcamStream;
     } catch (err) {
-        // Fallback para padrão
         try {
             webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
             videoEl.srcObject = webcamStream;
@@ -110,9 +108,9 @@ if(btnCapture) btnCapture.addEventListener('click', () => {
     const ctx = canvasEl.getContext('2d');
     ctx.drawImage(videoEl, 0, 0);
     
-    // PNG para evitar artefatos de compressão que atrapalham leitura de texto
+    // PNG para máxima clareza do texto
     canvasEl.toBlob((blob) => {
-        const file = new File([blob], "scan_high_quality.png", { type: "image/png" });
+        const file = new File([blob], "scan_google_search.png", { type: "image/png" });
         encerrarWebcam();
         processarImagemParaAnalise(file);
     }, 'image/png');
@@ -127,13 +125,13 @@ function encerrarWebcam() {
 }
 if(closeWebcamBtn) closeWebcamBtn.addEventListener('click', encerrarWebcam);
 
-// --- PROCESSAMENTO E IA (LÓGICA CORRIGIDA) ---
+// --- PROCESSAMENTO E IA CONECTADA ---
 
 function processarImagemParaAnalise(file) {
     if (!file) return;
     
     modalForm.classList.remove('hidden');
-    document.getElementById('modal-title').innerText = isEditing ? "Revalidando..." : "Perícia Técnica...";
+    document.getElementById('modal-title').innerText = isEditing ? "Validando..." : "Pesquisando na Rede...";
     btnChangePhoto.style.display = 'none';
     
     const reader = new FileReader();
@@ -143,7 +141,7 @@ function processarImagemParaAnalise(file) {
             const base64Parts = e.target.result.split(',');
             if(base64Parts.length > 1) {
                 currentImageBase64 = base64Parts[1];
-                identificarModeloBlindado(currentImageBase64);
+                identificarComGoogleSearch(currentImageBase64);
             }
         }
         fazerUploadCloudinary(file);
@@ -172,42 +170,43 @@ async function fazerUploadCloudinary(file) {
     }
 }
 
-async function identificarModeloBlindado(base64Image) {
+async function identificarComGoogleSearch(base64Image) {
     aiLoading.classList.remove('hidden');
     
-    if (!isEditing) limparFormulario("Consultando Base de Dados Mattel...");
+    if (!isEditing) limparFormulario("Consultando Google...");
 
-    // PROMPT REVISADO PARA EVITAR CONFUSÃO DE SÉRIE X MODELO
+    // PROMPT OBRIGANDO O USO DA FERRAMENTA DE BUSCA
     const prompt = `
-    Aja como um Perito Especialista em Hot Wheels (Diecast).
-    Sua missão é identificar o NOME DO MODELO (Casting) correto, distinguindo-o de nomes de séries.
-
-    Passos de Análise Obrigatórios:
-    1. **Leitura (OCR):** Tente ler qualquer texto impresso no chassi (fundo), na lateral do carro ou na cartela se visível.
-    2. **Forma (Shape):** Analise a silhueta. É um carro real (ex: Mustang) ou Fantasia (ex: Roadster Bite, Sharkruiser)?
-    3. **Diferenciação Crítica:** NÃO confunda o nome da série (ex: "Slide Street", "Track Stars", "HW Rescue") com o nome do carro.
-    4. **Exemplo de Erro a Evitar:** Não chame um "Roadster Bite" de "Slide Street". "Slide Street" é a série, "Roadster Bite" é o carro.
-
-    Retorne APENAS este JSON estrito:
+    Use a ferramenta de Busca do Google (Google Search) para identificar este carro Hot Wheels com exatidão.
+    
+    1. LEIA O TEXTO no chassi ou na lateral do carro na imagem (OCR). O nome verdadeiro geralmente está escrito na base de plástico/metal.
+    2. Pesquise visualmente as características para confirmar o 'Casting Name' (Nome do Modelo).
+    3. NÃO CONFUNDA o nome da SÉRIE (ex: Slide Street, HW Turbo) com o NOME DO CARRO (ex: Roadster Bite, Mustang).
+    4. Se o carro tiver formato de cobra/animal, verifique se é o 'Roadster Bite', 'Snake Oiler' ou similar.
+    
+    Retorne JSON estrito:
     {
-        "modelo": "Nome Exato do Casting (Ex: Roadster Bite, Twin Mill)",
-        "ano": "Série / Coleção (Ex: HW Street Beasts, HW City)",
-        "cor": "Cor predominante e detalhes (Ex: Azul claro com detalhes pretos)",
-        "curiosidade": "Fato técnico breve (Ex: Formato de víbora, chassi de plástico)."
+        "modelo": "Nome Oficial do Casting Confirmado na Web",
+        "ano": "Série / Coleção encontrada",
+        "cor": "Descrição da cor",
+        "curiosidade": "Um fato real encontrado na busca."
     }
-
-    Se não tiver certeza absoluta do nome do modelo, responda "Desconhecido" no campo modelo. Não chute.
     `;
 
     try {
-        // Configuração de temperatura baixa para reduzir "criatividade" (alucinações)
         const requestBody = {
-            contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/png", data: base64Image } }] }],
+            contents: [{ 
+                parts: [
+                    { text: prompt }, 
+                    { inline_data: { mime_type: "image/png", data: base64Image } }
+                ] 
+            }],
+            // --- AQUI ESTÁ A MÁGICA: ATIVANDO O GOOGLE SEARCH ---
+            tools: [
+                { google_search: {} } 
+            ],
             generationConfig: {
-                temperature: 0.1, // Quase zero para máxima precisão lógica
-                topK: 32,
-                topP: 0.95,
-                maxOutputTokens: 256,
+                temperature: 0.1, // Baixa criatividade para forçar fatos
             }
         };
 
@@ -219,48 +218,59 @@ async function identificarModeloBlindado(base64Image) {
         
         const data = await response.json();
         
-        if(!data.candidates) throw new Error("IA falhou na resposta.");
+        if(!data.candidates || !data.candidates[0].content) {
+            console.error("Erro API:", data);
+            throw new Error("A IA não conseguiu acessar os dados.");
+        }
 
-        const textResult = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+        // Extrai o texto da resposta (A IA pode adicionar metadados de busca, limpamos isso)
+        let textResult = data.candidates[0].content.parts[0].text;
+        
+        // Limpeza robusta do JSON
+        textResult = textResult.replace(/```json/g, '').replace(/```/g, '');
+        // Às vezes a IA com search coloca texto antes do JSON, pegamos só o bloco {}
+        const jsonStartIndex = textResult.indexOf('{');
+        const jsonEndIndex = textResult.lastIndexOf('}');
+        if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+            textResult = textResult.substring(jsonStartIndex, jsonEndIndex + 1);
+        }
+
         const jsonResult = JSON.parse(textResult);
 
-        // LÓGICA DE DUPLICIDADE (SUPERMERCADO)
+        // Lógica de Duplicidade
         if (!isEditing) {
             const carroExistente = verificarSeJaPossui(jsonResult.modelo);
             if (carroExistente) {
                 if (navigator.vibrate) navigator.vibrate([200]);
-                alert(`⚠️ ALERTA: O modelo "${carroExistente.nome}" JÁ ESTÁ na sua coleção!\nStatus: ${carroExistente.status === 'colecao' ? 'Garagem' : 'Desejado'}.\n\nAbrindo registro existente...`);
+                alert(`⚠️ ESTE ITEM JÁ EXISTE!\nModelo: ${carroExistente.nome}\nVamos abrir o registro...`);
                 abrirFichaExistente(carroExistente);
                 aiLoading.classList.add('hidden');
                 return;
             }
         }
 
-        // Preenchimento
         document.getElementById('inp-nome').value = jsonResult.modelo || "";
         document.getElementById('inp-ano').value = jsonResult.ano || "";
         document.getElementById('inp-cor').value = jsonResult.cor || "";
         document.getElementById('inp-obs').value = jsonResult.curiosidade || "";
 
-        // Se a IA não souber, foca no nome para o usuário digitar
-        if (jsonResult.modelo === "Desconhecido" || !jsonResult.modelo) {
-            document.getElementById('inp-nome').value = "";
-            document.getElementById('inp-nome').placeholder = "Não identificado. Digite o nome...";
+        if (!jsonResult.modelo || jsonResult.modelo === "Desconhecido") {
+            document.getElementById('inp-nome').placeholder = "Não encontrado. Digite o nome...";
             document.getElementById('inp-nome').focus();
         }
 
     } catch (error) {
-        console.error("Erro IA:", error);
+        console.error("Erro na Análise Conectada:", error);
         if (!isEditing) {
-            document.getElementById('inp-nome').placeholder = "Erro na análise. Digite o nome...";
-            document.getElementById('inp-obs').value = "Não foi possível identificar automaticamente.";
+            document.getElementById('inp-nome').value = "Erro na Busca";
+            document.getElementById('inp-obs').value = "Não foi possível confirmar os dados online. Verifique manualmente.";
         }
     } finally {
         aiLoading.classList.add('hidden');
     }
 }
 
-// Verifica duplicidade exata
+// Verifica duplicidade
 function verificarSeJaPossui(nomeDetectado) {
     if (!nomeDetectado || nomeDetectado === "Desconhecido") return null;
     return cachedData.find(c => 
@@ -302,9 +312,9 @@ document.getElementById('car-form').addEventListener('submit', (e) => {
     };
 
     if (carId) {
-        update(ref(db, `hotwheels/${carId}`), dadosCarro).then(() => finalizarAcao("Ficha atualizada!"));
+        update(ref(db, `hotwheels/${carId}`), dadosCarro).then(() => finalizarAcao("Atualizado com sucesso!"));
     } else {
-        push(dbRef, dadosCarro).then(() => finalizarAcao("Adicionado ao Catálogo!"));
+        push(dbRef, dadosCarro).then(() => finalizarAcao("Cadastrado!"));
     }
 });
 
@@ -324,7 +334,7 @@ onValue(dbRef, (snapshot) => {
 
     if (!data) {
         totalCarsEl.innerText = "0";
-        dashboard.innerHTML = '<div class="empty-state"><i class="fas fa-car"></i><p>Garagem vazia.</p></div>';
+        dashboard.innerHTML = '<div class="empty-state"><i class="fas fa-car"></i><p>Nenhum carro ainda.</p></div>';
         return;
     }
 
@@ -352,7 +362,7 @@ function criarCard(id, carro) {
     
     let actionButton = '';
     if (carro.status === 'desejo') {
-        actionButton = `<button class="btn-action btn-acquire" onclick="window.moverParaGaragem('${id}')"><i class="fas fa-check"></i> Adquiri!</button>`;
+        actionButton = `<button class="btn-action btn-acquire" onclick="window.moverParaGaragem('${id}')"><i class="fas fa-check"></i> Comprado!</button>`;
     } else {
          actionButton = `<button class="btn-action btn-edit" onclick="window.editarCarro('${id}')"><i class="fas fa-pen"></i> Editar</button>`;
     }
@@ -408,11 +418,11 @@ window.editarCarro = function(id) {
 }
 
 window.moverParaGaragem = function(id) {
-    update(ref(db, `hotwheels/${id}`), { status: 'colecao' }).then(() => alert("Item movido para Garagem!"));
+    update(ref(db, `hotwheels/${id}`), { status: 'colecao' }).then(() => alert("Adicionado à Garagem!"));
 }
 
 window.deletarCarro = function(id) {
-    if (confirm("Apagar registro?")) remove(ref(db, `hotwheels/${id}`));
+    if (confirm("Apagar?")) remove(ref(db, `hotwheels/${id}`));
 }
 
 if(closeModalBtn) closeModalBtn.addEventListener('click', () => { modalForm.classList.add('hidden'); isEditing = false; });
