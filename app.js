@@ -1,4 +1,4 @@
-// app.js - VERSÃO BLINDADA (MODO CIRÚRGICO - TEMPERATURA ZERO)
+// app.js - VERSÃO DEFINITIVA: IDENTIFICAÇÃO HIERÁRQUICA E PRECISA
 
 // 1. IMPORTAÇÕES
 import { initializeApp } from "firebase/app";
@@ -11,10 +11,10 @@ try {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
     dbRef = ref(db, 'hotwheels');
-    console.log("Sistema HW Garage: Módulo de Precisão Máxima Iniciado.");
+    console.log("Sistema HW Garage: Módulo de Visão Computacional Avançado Iniciado.");
 } catch (error) {
     console.error("Erro Crítico Firebase:", error);
-    alert("Falha na conexão com o banco de dados.");
+    alert("Falha na conexão com o banco de dados. Verifique o console.");
 }
 
 // Variáveis Globais
@@ -22,7 +22,7 @@ const API_KEY = geminiKeyPart1 + geminiKeyPart2;
 let currentImageBase64 = null;
 let currentCloudinaryUrl = null;
 let webcamStream = null;
-let cachedData = []; 
+let cachedData = []; // Cache para verificação de duplicidade
 let isEditing = false;
 
 const DEFAULT_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/2/23/Hot_Wheels_logo.svg";
@@ -78,10 +78,11 @@ if(editFileInput) editFileInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files.length > 0) processarImagemParaAnalise(e.target.files[0]);
 });
 
-// Webcam (Tenta pegar 4K/UHD se disponível para ajudar a IA)
+// Webcam (Alta Resolução)
 async function abrirWebcamPC() {
     modalWebcam.classList.remove('hidden');
     try {
+        // Tenta forçar resolução máxima para ajudar a ler detalhes
         webcamStream = await navigator.mediaDevices.getUserMedia({ 
             video: { 
                 facingMode: "environment", 
@@ -91,12 +92,12 @@ async function abrirWebcamPC() {
         });
         videoEl.srcObject = webcamStream;
     } catch (err) {
-        // Fallback se não suportar 4K
+        // Fallback para padrão
         try {
             webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
             videoEl.srcObject = webcamStream;
         } catch (err2) {
-            alert("Erro na Webcam. Usando arquivo.");
+            alert("Erro na Webcam. Use a opção de arquivo.");
             modalWebcam.classList.add('hidden');
             fileInput.click();
         }
@@ -109,9 +110,9 @@ if(btnCapture) btnCapture.addEventListener('click', () => {
     const ctx = canvasEl.getContext('2d');
     ctx.drawImage(videoEl, 0, 0);
     
-    // Captura em qualidade máxima (PNG para não perder detalhes dos textos)
+    // PNG para evitar artefatos de compressão que atrapalham leitura de texto
     canvasEl.toBlob((blob) => {
-        const file = new File([blob], "scan_high_res.png", { type: "image/png" });
+        const file = new File([blob], "scan_high_quality.png", { type: "image/png" });
         encerrarWebcam();
         processarImagemParaAnalise(file);
     }, 'image/png');
@@ -126,13 +127,13 @@ function encerrarWebcam() {
 }
 if(closeWebcamBtn) closeWebcamBtn.addEventListener('click', encerrarWebcam);
 
-// --- PROCESSAMENTO E IA BLINDADA ---
+// --- PROCESSAMENTO E IA (LÓGICA CORRIGIDA) ---
 
 function processarImagemParaAnalise(file) {
     if (!file) return;
     
     modalForm.classList.remove('hidden');
-    document.getElementById('modal-title').innerText = isEditing ? "Validando Foto..." : "Perícia Técnica...";
+    document.getElementById('modal-title').innerText = isEditing ? "Revalidando..." : "Perícia Técnica...";
     btnChangePhoto.style.display = 'none';
     
     const reader = new FileReader();
@@ -174,40 +175,38 @@ async function fazerUploadCloudinary(file) {
 async function identificarModeloBlindado(base64Image) {
     aiLoading.classList.remove('hidden');
     
-    if (!isEditing) limparFormulario("Consultando Banco de Dados...");
+    if (!isEditing) limparFormulario("Consultando Base de Dados Mattel...");
 
-    // PROMPT DE SEGURANÇA MÁXIMA
+    // PROMPT REVISADO PARA EVITAR CONFUSÃO DE SÉRIE X MODELO
     const prompt = `
-    ATENÇÃO: MODO DE PRECISÃO EXTREMA.
-    Você é um software de banco de dados de Hot Wheels.
-    
-    Analise a imagem procurando por evidências físicas:
-    1. Texto estampado no chassi (fundo do carro).
-    2. Design exato das rodas (Ex: PR5, MC5, Real Riders).
-    3. Logotipos impressos na lataria (Tampos).
-    
-    REGRAS RÍGIDAS:
-    - Se a imagem estiver borrada, escura ou não mostrar o carro claramente, RETORNE "Desconhecido" no modelo.
-    - NÃO TENTE ADIVINHAR. Se parecer um "Twin Mill" mas você não tiver certeza da série, coloque apenas "Twin Mill".
-    - Ano: Se não conseguir ler o ano no chassi ou identificar a série pelos decalques, deixe em branco ou coloque "Série não identificada".
-    
-    Retorne JSON estrito:
+    Aja como um Perito Especialista em Hot Wheels (Diecast).
+    Sua missão é identificar o NOME DO MODELO (Casting) correto, distinguindo-o de nomes de séries.
+
+    Passos de Análise Obrigatórios:
+    1. **Leitura (OCR):** Tente ler qualquer texto impresso no chassi (fundo), na lateral do carro ou na cartela se visível.
+    2. **Forma (Shape):** Analise a silhueta. É um carro real (ex: Mustang) ou Fantasia (ex: Roadster Bite, Sharkruiser)?
+    3. **Diferenciação Crítica:** NÃO confunda o nome da série (ex: "Slide Street", "Track Stars", "HW Rescue") com o nome do carro.
+    4. **Exemplo de Erro a Evitar:** Não chame um "Roadster Bite" de "Slide Street". "Slide Street" é a série, "Roadster Bite" é o carro.
+
+    Retorne APENAS este JSON estrito:
     {
-        "modelo": "Nome Oficial do Casting",
-        "ano": "Série Específica (ou 'Ano Base' se genérico)",
-        "cor": "Cor exata",
-        "curiosidade": "Fato técnico verificável (Chassi metal/plástico, Designer)."
+        "modelo": "Nome Exato do Casting (Ex: Roadster Bite, Twin Mill)",
+        "ano": "Série / Coleção (Ex: HW Street Beasts, HW City)",
+        "cor": "Cor predominante e detalhes (Ex: Azul claro com detalhes pretos)",
+        "curiosidade": "Fato técnico breve (Ex: Formato de víbora, chassi de plástico)."
     }
+
+    Se não tiver certeza absoluta do nome do modelo, responda "Desconhecido" no campo modelo. Não chute.
     `;
 
     try {
-        // CONFIGURAÇÃO TÉCNICA PARA REDUZIR ALUCINAÇÃO (Temperature 0)
+        // Configuração de temperatura baixa para reduzir "criatividade" (alucinações)
         const requestBody = {
             contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/png", data: base64Image } }] }],
             generationConfig: {
-                temperature: 0.0, // Tira a criatividade. Resposta seca e correta.
-                topK: 1, // Considera apenas a opção mais provável.
-                topP: 1,
+                temperature: 0.1, // Quase zero para máxima precisão lógica
+                topK: 32,
+                topP: 0.95,
                 maxOutputTokens: 256,
             }
         };
@@ -220,10 +219,7 @@ async function identificarModeloBlindado(base64Image) {
         
         const data = await response.json();
         
-        if(!data.candidates) {
-            console.error("Bloqueio de segurança da IA", data);
-            throw new Error("IA não conseguiu processar com segurança.");
-        }
+        if(!data.candidates) throw new Error("IA falhou na resposta.");
 
         const textResult = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         const jsonResult = JSON.parse(textResult);
@@ -232,11 +228,8 @@ async function identificarModeloBlindado(base64Image) {
         if (!isEditing) {
             const carroExistente = verificarSeJaPossui(jsonResult.modelo);
             if (carroExistente) {
-                // Toca um som de alerta (opcional) ou vibra o celular
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                
-                alert(`🛑 PARE! VOCÊ JÁ TEM ESTE CARRO!\n\nModelo: ${carroExistente.nome}\nStatus: ${carroExistente.status === 'colecao' ? 'Na Garagem' : 'Desejado'}\n\nAbrindo ficha para conferência...`);
-                
+                if (navigator.vibrate) navigator.vibrate([200]);
+                alert(`⚠️ ALERTA: O modelo "${carroExistente.nome}" JÁ ESTÁ na sua coleção!\nStatus: ${carroExistente.status === 'colecao' ? 'Garagem' : 'Desejado'}.\n\nAbrindo registro existente...`);
                 abrirFichaExistente(carroExistente);
                 aiLoading.classList.add('hidden');
                 return;
@@ -249,28 +242,27 @@ async function identificarModeloBlindado(base64Image) {
         document.getElementById('inp-cor').value = jsonResult.cor || "";
         document.getElementById('inp-obs').value = jsonResult.curiosidade || "";
 
-        // Se a IA devolver "Desconhecido", forçamos o foco no campo nome para o usuário digitar
-        if (jsonResult.modelo === "Desconhecido" || jsonResult.modelo === "") {
+        // Se a IA não souber, foca no nome para o usuário digitar
+        if (jsonResult.modelo === "Desconhecido" || !jsonResult.modelo) {
+            document.getElementById('inp-nome').value = "";
+            document.getElementById('inp-nome').placeholder = "Não identificado. Digite o nome...";
             document.getElementById('inp-nome').focus();
-            document.getElementById('inp-obs').value = "Identificação automática falhou. Insira os dados do chassi.";
         }
 
     } catch (error) {
         console.error("Erro IA:", error);
         if (!isEditing) {
-            document.getElementById('inp-nome').value = "Não Identificado";
-            document.getElementById('inp-obs').value = "A foto não tem detalhes suficientes. Tente fotografar o chassi.";
+            document.getElementById('inp-nome').placeholder = "Erro na análise. Digite o nome...";
+            document.getElementById('inp-obs').value = "Não foi possível identificar automaticamente.";
         }
     } finally {
         aiLoading.classList.add('hidden');
     }
 }
 
-// Busca Exata
+// Verifica duplicidade exata
 function verificarSeJaPossui(nomeDetectado) {
-    if (!nomeDetectado || nomeDetectado === "Desconhecido" || nomeDetectado === "Não Identificado") return null;
-    
-    // Busca exata ou parcial muito forte
+    if (!nomeDetectado || nomeDetectado === "Desconhecido") return null;
     return cachedData.find(c => 
         c.status === 'colecao' && 
         c.nome.toLowerCase().trim() === nomeDetectado.toLowerCase().trim()
@@ -332,7 +324,7 @@ onValue(dbRef, (snapshot) => {
 
     if (!data) {
         totalCarsEl.innerText = "0";
-        dashboard.innerHTML = '<div class="empty-state"><i class="fas fa-folder-open"></i><p>Catálogo vazio.</p></div>';
+        dashboard.innerHTML = '<div class="empty-state"><i class="fas fa-car"></i><p>Garagem vazia.</p></div>';
         return;
     }
 
@@ -341,7 +333,6 @@ onValue(dbRef, (snapshot) => {
     lista.forEach(([id, carro]) => {
         const carroCompleto = { id, ...carro };
         cachedData.push(carroCompleto);
-        
         if (carro.status === 'colecao') countGaragem++;
         criarCard(id, carro);
     });
@@ -361,7 +352,7 @@ function criarCard(id, carro) {
     
     let actionButton = '';
     if (carro.status === 'desejo') {
-        actionButton = `<button class="btn-action btn-acquire" onclick="window.moverParaGaragem('${id}')"><i class="fas fa-check"></i> Comprado!</button>`;
+        actionButton = `<button class="btn-action btn-acquire" onclick="window.moverParaGaragem('${id}')"><i class="fas fa-check"></i> Adquiri!</button>`;
     } else {
          actionButton = `<button class="btn-action btn-edit" onclick="window.editarCarro('${id}')"><i class="fas fa-pen"></i> Editar</button>`;
     }
@@ -417,11 +408,11 @@ window.editarCarro = function(id) {
 }
 
 window.moverParaGaragem = function(id) {
-    update(ref(db, `hotwheels/${id}`), { status: 'colecao' }).then(() => alert("Movido para Garagem!"));
+    update(ref(db, `hotwheels/${id}`), { status: 'colecao' }).then(() => alert("Item movido para Garagem!"));
 }
 
 window.deletarCarro = function(id) {
-    if (confirm("Deletar registro permanentemente?")) remove(ref(db, `hotwheels/${id}`));
+    if (confirm("Apagar registro?")) remove(ref(db, `hotwheels/${id}`));
 }
 
 if(closeModalBtn) closeModalBtn.addEventListener('click', () => { modalForm.classList.add('hidden'); isEditing = false; });
