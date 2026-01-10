@@ -3,64 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hot Wheels Collector Ultimate</title>
+    <title>Hot Wheels Intelligent Catalog</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
-        <div class="logo">
-            <i class="fas fa-fire-alt"></i> HW<span>GARAGE</span>
-        </div>
-        <div class="stats-container">
-            <i class="fas fa-warehouse"></i>
-            <span id="total-cars">0</span> na Garagem
-        </div>
+        <div class="logo"><i class="fas fa-fire-alt"></i> HW<span>MASTER</span></div>
+        <div class="stats-container"><i class="fas fa-warehouse"></i> <span id="total-cars">0</span> na Garagem</div>
     </header>
 
     <main>
         <div class="actions-container">
             <button id="btn-scan" class="btn-main">
                 <div class="icon-bg"><i class="fas fa-camera"></i></div>
-                <span>Escanear com IA</span>
+                <span>Escanear / Identificar</span>
             </button>
-            
             <button id="btn-manual" class="btn-secondary-action">
                 <div class="icon-bg"><i class="fas fa-pen"></i></div>
-                <span>Adicionar Manual</span>
+                <span>Manual</span>
             </button>
-
-            <input type="file" id="file-input" accept="image/*" capture="environment" style="display: none;">
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
         </div>
 
         <div class="filters-area">
             <div class="search-box">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="search-input" placeholder="Pesquisar modelo...">
-                <button id="btn-search-action">Buscar</button>
+                <input type="text" id="search-input" placeholder="Buscar por modelo, ano ou cor...">
+                <button id="btn-search-action">Ir</button>
             </div>
-
             <div class="tabs">
                 <button class="tab active" data-filter="todos">Todos</button>
                 <button class="tab" data-filter="colecao">Minha Garagem</button>
-                <button class="tab" data-filter="desejo">Desejos</button>
+                <button class="tab" data-filter="desejo">Lista de Desejos</button>
             </div>
         </div>
 
         <div id="dashboard" class="grid-container">
-            <div class="loading-state">
-                <i class="fas fa-circle-notch fa-spin"></i>
-                <p>Carregando coleção...</p>
-            </div>
+            <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i><p>Carregando catálogo...</p></div>
         </div>
     </main>
 
     <div id="modal-form" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">Novo Carro</h2>
+                <h2 id="modal-title">Detalhes do Carro</h2>
                 <span class="close-modal">&times;</span>
             </div>
             
@@ -70,7 +58,7 @@
                     <i class="fas fa-camera"></i> Trocar Foto
                 </div>
                 <div id="ai-loading" class="hidden">
-                    <i class="fas fa-robot fa-bounce"></i> IA Analisando...
+                    <i class="fas fa-robot fa-bounce"></i> Analisando...
                 </div>
             </div>
             <input type="file" id="edit-file-input" accept="image/*" style="display: none;">
@@ -79,35 +67,35 @@
                 <input type="hidden" id="inp-id">
                 
                 <div class="form-group">
-                    <label>Modelo</label>
-                    <input type="text" id="inp-nome" required placeholder="Ex: Bone Shaker">
+                    <label>Modelo (Casting)</label>
+                    <input type="text" id="inp-nome" required placeholder="Ex: Twin Mill">
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Ano/Série</label>
-                        <input type="text" id="inp-ano" placeholder="2024">
+                        <label>Série / Ano</label>
+                        <input type="text" id="inp-ano" placeholder="Ex: 2024 Mainline">
                     </div>
                     <div class="form-group">
                         <label>Cor</label>
-                        <input type="text" id="inp-cor" placeholder="Cor Principal">
+                        <input type="text" id="inp-cor" placeholder="Ex: Verde">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Curiosidades</label>
-                    <textarea id="inp-obs" placeholder="Detalhes..."></textarea>
+                    <label>Notas Técnicas</label>
+                    <textarea id="inp-obs" placeholder="Chassis, rodas, variações..."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Status</label>
+                    <label>Localização</label>
                     <select id="inp-status">
-                        <option value="colecao">✅ Tenho na Garagem</option>
-                        <option value="desejo">⭐ Lista de Desejos</option>
+                        <option value="colecao">Garagem (Tenho)</option>
+                        <option value="desejo">Lista de Desejos (Quero)</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-save">SALVAR REGISTRO</button>
+                <button type="submit" class="btn-save">SALVAR FICHA</button>
             </form>
         </div>
     </div>
@@ -122,7 +110,7 @@
                 <video id="webcam-video" autoplay playsinline></video>
                 <canvas id="webcam-canvas" style="display:none;"></canvas>
             </div>
-            <button id="btn-capture" class="btn-main">📸 Capturar Foto</button>
+            <button id="btn-capture" class="btn-main">📸 Tirar Foto</button>
         </div>
     </div>
 
@@ -134,8 +122,6 @@
       }
     }
     </script>
-
     <script type="module" src="app.js"></script>
-
 </body>
 </html>
