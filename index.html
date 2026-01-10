@@ -4,68 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hot Wheels Collector AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <div class="logo">🔥 HW Collector</div>
-        <div class="stats">
-            <span id="total-cars">0</span> Carros
+        <div class="logo">
+            <i class="fas fa-fire-alt"></i> HW<span>Collector</span>
+        </div>
+        <div class="stats-container">
+            <i class="fas fa-car-side"></i>
+            <span id="total-cars">0</span>
         </div>
     </header>
 
     <main>
-        <div class="actions">
-            <button id="btn-camera" class="btn-primary"><i class="fas fa-camera"></i> Identificar Carro</button>
+        <div class="actions-container">
+            <button id="btn-camera" class="btn-main">
+                <div class="icon-bg"><i class="fas fa-camera"></i></div>
+                <span>Escanear Carro</span>
+            </button>
             <input type="file" id="file-input" accept="image/*" style="display: none;">
         </div>
 
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" id="search-input" placeholder="Pesquisar na coleção...">
-        </div>
+        <div class="filters-area">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Qual carro procura?">
+            </div>
 
-        <div class="tabs">
-            <button class="tab active" onclick="filtrar('todos')">Todos</button>
-            <button class="tab" onclick="filtrar('colecao')">Minha Coleção</button>
-            <button class="tab" onclick="filtrar('desejo')">Lista de Desejos</button>
+            <div class="tabs">
+                <button class="tab active" onclick="filtrar('todos')">Todos</button>
+                <button class="tab" onclick="filtrar('colecao')">Garagem</button>
+                <button class="tab" onclick="filtrar('desejo')">Desejos</button>
+            </div>
         </div>
 
         <div id="dashboard" class="grid-container">
-            <div class="loading">Carregando garagem...</div>
+            <div class="loading-state">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                <p>Carregando motores...</p>
+            </div>
         </div>
     </main>
 
     <div id="modal-form" class="modal hidden">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 id="modal-title">Novo Carro Detectado!</h2>
+            <div class="modal-header">
+                <h2>Novo Piloto!</h2>
+                <span class="close-modal">&times;</span>
+            </div>
             
-            <div class="preview-img-container">
+            <div class="preview-box">
                 <img id="preview-img" src="" alt="Preview">
-                <div id="ai-loading" class="hidden">🤖 IA Analisando...</div>
+                <div id="ai-loading" class="hidden">
+                    <i class="fas fa-robot"></i> IA Analisando...
+                </div>
             </div>
 
             <form id="car-form">
-                <label>Nome do Modelo</label>
-                <input type="text" id="inp-nome" required placeholder="Ex: Twin Mill">
+                <div class="input-group">
+                    <label>Modelo</label>
+                    <input type="text" id="inp-nome" required placeholder="Ex: Twin Mill">
+                </div>
                 
-                <label>Ano / Série</label>
-                <input type="text" id="inp-ano" placeholder="Ex: 2024 / Mainline">
-                
-                <label>Cor / Detalhes</label>
-                <input type="text" id="inp-cor" placeholder="Ex: Vermelho metálico">
+                <div class="row">
+                    <div class="input-group">
+                        <label>Ano/Série</label>
+                        <input type="text" id="inp-ano" placeholder="2024">
+                    </div>
+                    <div class="input-group">
+                        <label>Cor</label>
+                        <input type="text" id="inp-cor" placeholder="Cor">
+                    </div>
+                </div>
 
-                <label>Curiosidade / Obs</label>
-                <textarea id="inp-obs" placeholder="A IA vai preencher aqui..."></textarea>
+                <div class="input-group">
+                    <label>Detalhes da IA</label>
+                    <textarea id="inp-obs" placeholder="Aguardando análise..."></textarea>
+                </div>
 
-                <div class="toggle-type">
-                    <label>Onde salvar?</label>
+                <div class="input-group">
+                    <label>Destino</label>
                     <select id="inp-status">
-                        <option value="colecao">✅ Tenho na Coleção</option>
+                        <option value="colecao">🏁 Minha Garagem</option>
                         <option value="desejo">⭐ Lista de Desejos</option>
                     </select>
                 </div>
@@ -74,6 +98,15 @@
             </form>
         </div>
     </div>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+      }
+    }
+    </script>
 
     <script type="module" src="app.js"></script>
     
