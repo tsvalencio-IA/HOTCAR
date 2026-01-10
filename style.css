@@ -50,38 +50,37 @@ header {
 /* LAYOUT */
 main { padding: 20px; max-width: 800px; margin: 0 auto; }
 
-/* BOTÃO PRINCIPAL */
-.actions-container { margin-bottom: 25px; }
+/* BOTÕES DE AÇÃO */
+.actions-container { 
+    margin-bottom: 25px; 
+    display: flex; 
+    gap: 10px; 
+}
+
 .btn-main {
     background: linear-gradient(90deg, var(--primary) 0%, #ff8800 100%);
-    color: white;
-    border: none;
-    width: 100%;
-    padding: 16px;
-    border-radius: 16px;
-    font-size: 1.1rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    cursor: pointer;
+    color: white; border: none; flex: 2; padding: 16px; border-radius: 16px;
+    font-size: 1rem; font-weight: 800; text-transform: uppercase; cursor: pointer;
     box-shadow: 0 8px 25px rgba(255, 85, 0, 0.3);
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
 }
-.btn-main:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(255, 85, 0, 0.2); }
-.icon-bg { background: rgba(255,255,255,0.25); padding: 8px; border-radius: 50%; display: flex; }
+
+.btn-secondary-action {
+    background: white; color: var(--secondary); border: 2px solid var(--secondary);
+    flex: 1; padding: 16px; border-radius: 16px;
+    font-size: 0.9rem; font-weight: 800; text-transform: uppercase; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-main:active, .btn-secondary-action:active { transform: scale(0.96); }
 
 /* FILTROS E BUSCA */
 .filters-area { margin-bottom: 25px; }
 
 .search-box {
-    background: white;
-    padding: 8px 8px 8px 15px;
-    border-radius: 50px;
+    background: white; padding: 8px 8px 8px 15px; border-radius: 50px;
     display: flex; align-items: center; gap: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    transition: border 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
+    border: 1px solid transparent; transition: border 0.3s;
 }
 .search-box:focus-within { border-color: var(--secondary); }
 .search-box input { border: none; outline: none; width: 100%; font-size: 1rem; color: #555; }
@@ -93,55 +92,34 @@ main { padding: 20px; max-width: 800px; margin: 0 auto; }
 
 .tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
 .tab {
-    background: white;
-    border: 1px solid #e0e0e0;
-    padding: 10px 20px;
-    border-radius: 25px;
-    color: #666;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.3s;
+    background: white; border: 1px solid #e0e0e0; padding: 10px 20px;
+    border-radius: 25px; color: #666; font-weight: 700; font-size: 0.9rem;
+    cursor: pointer; white-space: nowrap; transition: all 0.3s;
 }
 .tab.active {
-    background: var(--secondary);
-    color: white;
-    border-color: var(--secondary);
+    background: var(--secondary); color: white; border-color: var(--secondary);
     box-shadow: 0 4px 10px rgba(0, 99, 197, 0.3);
 }
 
 /* GRID DE CARROS */
 .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 15px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;
 }
 .loading-state, .empty-state {
-    grid-column: 1/-1;
-    text-align: center;
-    padding: 40px;
-    color: #888;
-    font-weight: 500;
+    grid-column: 1/-1; text-align: center; padding: 40px; color: #888; font-weight: 500;
 }
 .empty-state i { font-size: 2rem; margin-bottom: 10px; color: #ccc; }
 
 /* CAR CARD */
 .car-card {
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--card-shadow);
-    transition: transform 0.2s;
-    position: relative;
-    display: flex; flex-direction: column;
+    background: white; border-radius: 16px; overflow: hidden;
+    box-shadow: var(--card-shadow); transition: transform 0.2s;
+    position: relative; display: flex; flex-direction: column;
 }
 .car-card:hover { transform: translateY(-4px); }
 
 .car-card img {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
+    width: 100%; height: 140px; object-fit: cover;
     border-bottom: 4px solid var(--gray-light);
 }
 
@@ -159,8 +137,7 @@ main { padding: 20px; max-width: 800px; margin: 0 auto; }
 .card-details { font-size: 0.8rem; color: #666; margin-bottom: 12px; flex: 1; }
 
 .btn-delete {
-    background: #fff0f0; color: #e74c3c;
-    border: none; padding: 8px; width: 100%;
+    background: #fff0f0; color: #e74c3c; border: none; padding: 8px; width: 100%;
     border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.8rem;
     display: flex; align-items: center; justify-content: center; gap: 5px;
     transition: background 0.2s;
@@ -171,37 +148,29 @@ main { padding: 20px; max-width: 800px; margin: 0 auto; }
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
-    z-index: 1000;
-    display: flex; justify-content: center; align-items: center;
+    z-index: 1000; display: flex; justify-content: center; align-items: center;
 }
 .hidden { display: none !important; }
 
 .modal-content {
     background: white; width: 90%; max-width: 420px;
     border-radius: 20px; padding: 25px;
-    max-height: 90vh; overflow-y: auto;
-    position: relative;
+    max-height: 90vh; overflow-y: auto; position: relative;
     animation: slideUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
-
-@keyframes slideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .modal-header h2 { margin: 0; font-size: 1.2rem; color: var(--primary); }
-.close-modal, .close-webcam { font-size: 1.8rem; cursor: pointer; color: #999; transition: color 0.2s; }
-.close-modal:hover { color: var(--text-main); }
+.close-modal, .close-webcam { font-size: 1.8rem; cursor: pointer; color: #999; }
 
-/* WEBCAM VIDEO */
+/* WEBCAM & FORM */
 .video-container { 
     background: black; border-radius: 12px; overflow: hidden; margin-bottom: 15px; 
     aspect-ratio: 4/3; display: flex; align-items: center; 
 }
 #webcam-video { width: 100%; height: 100%; object-fit: cover; }
 
-/* FORM & PREVIEW */
 .preview-box { position: relative; margin-bottom: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 #preview-img { width: 100%; height: 200px; object-fit: cover; display: block; }
 
