@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot Wheels Collector AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">🔥 HW Collector</div>
+        <div class="stats">
+            <span id="total-cars">0</span> Carros
+        </div>
+    </header>
+
+    <main>
+        <div class="actions">
+            <button id="btn-camera" class="btn-primary"><i class="fas fa-camera"></i> Identificar Carro</button>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+        </div>
+
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="Pesquisar na coleção...">
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="filtrar('todos')">Todos</button>
+            <button class="tab" onclick="filtrar('colecao')">Minha Coleção</button>
+            <button class="tab" onclick="filtrar('desejo')">Lista de Desejos</button>
+        </div>
+
+        <div id="dashboard" class="grid-container">
+            <div class="loading">Carregando garagem...</div>
+        </div>
+    </main>
+
+    <div id="modal-form" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Novo Carro Detectado!</h2>
+            
+            <div class="preview-img-container">
+                <img id="preview-img" src="" alt="Preview">
+                <div id="ai-loading" class="hidden">🤖 IA Analisando...</div>
+            </div>
+
+            <form id="car-form">
+                <label>Nome do Modelo</label>
+                <input type="text" id="inp-nome" required placeholder="Ex: Twin Mill">
+                
+                <label>Ano / Série</label>
+                <input type="text" id="inp-ano" placeholder="Ex: 2024 / Mainline">
+                
+                <label>Cor / Detalhes</label>
+                <input type="text" id="inp-cor" placeholder="Ex: Vermelho metálico">
+
+                <label>Curiosidade / Obs</label>
+                <textarea id="inp-obs" placeholder="A IA vai preencher aqui..."></textarea>
+
+                <div class="toggle-type">
+                    <label>Onde salvar?</label>
+                    <select id="inp-status">
+                        <option value="colecao">✅ Tenho na Coleção</option>
+                        <option value="desejo">⭐ Lista de Desejos</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-save">Salvar no Sistema</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    
+    <script>
+        function filtrar(tipo) {
+            window.dispatchEvent(new CustomEvent('filtrarGrid', { detail: tipo }));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
