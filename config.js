@@ -2,7 +2,6 @@
 // ARQUIVO DE CONFIGURAÇÃO - VERSÃO FINAL (SEM ERROS DE SINTAXE)
 
 // 1. Configuração do Firebase
-// Certifique-se de copiar os dados do seu Console Firebase sem duplicar a palavra 'const'
 const firebaseConfig = {
   apiKey: "AIzaSyA_0h6IBSVIn16ajdHj-vFwFfdEOd_nMz8",
   authDomain: "hotwheels-a4395.firebaseapp.com",
@@ -23,5 +22,8 @@ const cloudinaryConfig = {
 const geminiKeyPart1 = "AIzaSyAfx1aiuP9jWzGDoh"; 
 const geminiKeyPart2 = "E6KxZ6_68wZkt27VI"; 
 
+// 4. Configuração de Admin (UIDs Autorizados)
+const ADMIN_UIDS = ["ADMIN_USER_UID_HERE"]; // Substituir pelo UID real do Admin
+
 // Exportação Segura para o App
-export { firebaseConfig, cloudinaryConfig, geminiKeyPart1, geminiKeyPart2 };
+export { firebaseConfig, cloudinaryConfig, geminiKeyPart1, geminiKeyPart2, ADMIN_UIDS };
