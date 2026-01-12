@@ -9,41 +9,75 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="logo"><i class="fas fa-fire-alt"></i> HW<span>MASTER</span></div>
-        <div class="stats-container"><i class="fas fa-warehouse"></i> <span id="total-cars">0</span> na Garagem</div>
-    </header>
 
-    <main>
-        <div class="actions-container">
-            <button id="btn-scan" class="btn-main">
-                <div class="icon-bg"><i class="fas fa-camera"></i></div>
-                <span>Escanear / Identificar</span>
-            </button>
-            <button id="btn-manual" class="btn-secondary-action">
-                <div class="icon-bg"><i class="fas fa-pen"></i></div>
-                <span>Manual</span>
-            </button>
-            <input type="file" id="file-input" accept="image/*" style="display: none;">
-        </div>
-
-        <div class="filters-area">
-            <div class="search-box">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="search-input" placeholder="Buscar por modelo, ano ou cor...">
-                <button id="btn-search-action">Ir</button>
+    <div id="login-screen">
+        <div class="login-content">
+            <div class="login-logo"><i class="fas fa-fire-alt"></i> HW<span>CATALOG</span></div>
+            <h2>Quem está pilotando?</h2>
+            
+            <div id="user-list" class="user-grid">
+                <div class="loading-users"><i class="fas fa-circle-notch fa-spin"></i> Buscando pilotos...</div>
             </div>
-            <div class="tabs">
-                <button class="tab active" data-filter="todos">Todos</button>
-                <button class="tab" data-filter="colecao">Minha Garagem</button>
-                <button class="tab" data-filter="desejo">Lista de Desejos</button>
+
+            <div class="admin-controls">
+                <button id="btn-admin-add" class="btn-secondary-action">
+                    <i class="fas fa-user-plus"></i> Novo Piloto (Admin)
+                </button>
             </div>
         </div>
+    </div>
 
-        <div id="dashboard" class="grid-container">
-            <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i><p>Carregando catálogo...</p></div>
+    <div id="app-container" class="hidden">
+        
+        <header>
+            <div class="header-left">
+                <div class="logo"><i class="fas fa-fire-alt"></i> HW<span>MASTER</span></div>
+                <div class="current-user-display">Piloto: <span id="display-username">...</span></div>
+            </div>
+            
+            <div class="view-selector-container">
+                <select id="view-selector">
+                    <option value="me">Minha Garagem</option>
+                    </select>
+                <button id="btn-logout" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item"><i class="fas fa-warehouse"></i> <span id="total-cars">0</span> na Garagem</div>
+            <div class="stat-item"><i class="fas fa-star"></i> <span id="total-wish">0</span> Desejados</div>
         </div>
-    </main>
+
+        <main>
+            <div id="owner-actions" class="actions-container">
+                <button id="btn-scan" class="btn-main">
+                    <div class="icon-bg"><i class="fas fa-camera"></i></div>
+                    <span>Escanear / Identificar</span>
+                </button>
+                <button id="btn-manual" class="btn-secondary-action">
+                    <div class="icon-bg"><i class="fas fa-pen"></i></div>
+                    <span>Manual</span>
+                </button>
+                <input type="file" id="file-input" accept="image/*" style="display: none;">
+            </div>
+
+            <div class="filters-area">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Buscar por modelo, ano ou cor...">
+                </div>
+                <div class="tabs">
+                    <button class="tab active" data-filter="todos">Todos</button>
+                    <button class="tab" data-filter="colecao">Garagem</button>
+                    <button class="tab" data-filter="desejo">Desejos</button>
+                </div>
+            </div>
+
+            <div id="dashboard" class="grid-container">
+                <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i><p>Acessando banco de dados...</p></div>
+            </div>
+        </main>
+    </div>
 
     <div id="modal-form" class="modal hidden">
         <div class="modal-content">
@@ -95,7 +129,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn-save">SALVAR FICHA</button>
+                <button type="submit" id="btn-save-car" class="btn-save">SALVAR FICHA</button>
             </form>
         </div>
     </div>
